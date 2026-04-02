@@ -1,404 +1,245 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
-/* ============================================================
-   @import "tailwindcss"
-   
-   WHY: This single line activates the entire Tailwind engine.
-   It scans your project, finds every utility class you use,
-   and generates only those styles. Without this line,
-   classes like "flex" or "text-xl" do nothing.
-   
-   Think of it as: "Turn on the Tailwind factory."
-   ============================================================ */
-@import "tailwindcss";
-
-/* ============================================================
-   @theme BLOCK
-   
-   WHY: This is where you define YOUR design tokens.
-   Tailwind reads these and auto-generates utility classes.
-   
-   Example: --color-brand below creates bg-brand, text-brand,
-   border-brand, ring-brand — all for free.
-   
-   RULE: Only put values here that Tailwind should turn into
-   utility classes. CSS variables just for internal use
-   (like component-level overrides) go outside @theme.
-   ============================================================ */
 @theme {
-  /* ----------------------------------------------------------
-     COLORS
+  /* ── BRAND COLORS ────────────────────────────────────────
+     Warm, food-market palette.
+     Coral = main action color (warm, appetizing)
+     Mint = success, selected states (fresh)
+     Amber = highlights, badges (warm honey)
+     Lavender = AI panel (soft, magical)
+     Cream = backgrounds (cozy, warm)
+  ──────────────────────────────────────────────────────── */
+  --color-coral: #ff6b6b;
+  --color-coral-light: #ff8e8e;
+  --color-coral-dark: #e85555;
+
+  --color-mint: #6bcb77;
+  --color-mint-light: #8dd994;
+  --color-mint-dark: #4db058;
+
+  --color-amber: #ffd93d;
+  --color-amber-light: #ffe066;
+  --color-amber-dark: #f0c400;
+
+  --color-lavender: #c77dff;
+  --color-lavender-light: #d9a0ff;
+  --color-lavender-dark: #a855f7;
+
+  --color-peach: #ffb347;
+  --color-sky: #74c0fc;
+
+  /* ── BACKGROUNDS ─────────────────────────────────────────
+     Layered warm creams — gives depth without being dark
+  ──────────────────────────────────────────────────────── */
+  --color-background: #fffdf7; /* warm white — page bg */
+  --color-surface: #fff8ee; /* cream — cards */
+  --color-surface-raised: #fff3e0; /* deeper cream — hover */
+  --color-border: #f0e6d3; /* soft tan border */
+
+  /* ── TEXT ────────────────────────────────────────────────
+     Warm dark tones — not harsh black
+  ──────────────────────────────────────────────────────── */
+  --color-text-primary: #2d1f0e; /* warm dark brown */
+  --color-text-secondary: #7c5c3a; /* medium warm brown */
+  --color-text-muted: #b8956a; /* light warm brown */
+
+  /* ── TYPOGRAPHY ──────────────────────────────────────────
+     Two fonts:
+     Display = Fraunces (cute, editorial, food-blog energy)
+     Body = Plus Jakarta Sans (clean, modern, readable)
      
-     Naming convention: --color-[name]
-     Tailwind strips "--color-" and creates: bg-[name],
-     text-[name], border-[name], etc.
-     
-     We define semantic names (what it MEANS) not visual names
-     (what it LOOKS like). Bad: --color-indigo. Good: --color-brand.
-     Why? If you rebrand, "brand" still makes sense. "indigo" doesn't.
-     ---------------------------------------------------------- */
+     We load these from Google Fonts in layout.tsx
+  ──────────────────────────────────────────────────────── */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
 
-  /* Brand: your primary identity color.
-     Used on CTAs, active states, highlights. */
-  --color-brand: #6366f1;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
 
-  /* Brand hover: slightly darker for hover states on brand elements.
-     Real dev pattern: always have a hover variant. */
-  --color-brand-hover: #4f46e5;
+  /* ── BORDER RADIUS ───────────────────────────────────────
+     Everything is soft and rounded — nothing sharp
+  ──────────────────────────────────────────────────────── */
+  --radius-sm: 0.5rem; /* 8px */
+  --radius-md: 0.875rem; /* 14px */
+  --radius-lg: 1.25rem; /* 20px */
+  --radius-xl: 1.75rem; /* 28px */
+  --radius-2xl: 2.5rem; /* 40px */
+  --radius-full: 9999px;
 
-  /* Background: the outermost page background.
-     In dark mode, this becomes near-black. */
-  --color-background: #0f0f13;
-
-  /* Surface: cards, panels, modals — "raised" elements.
-     Slightly lighter than background to create depth. */
-  --color-surface: #1a1a24;
-
-  /* Surface-raised: elements on top of surface (dropdowns, tooltips).
-     Each level gets slightly lighter = visual hierarchy. */
-  --color-surface-raised: #22222f;
-
-  /* Border: subtle lines between elements.
-     Never pure white — too harsh. */
-  --color-border: #2e2e40;
-
-  /* Text tokens — semantic naming again */
-  --color-text-primary: #f1f5f9; /* Main readable text */
-  --color-text-secondary: #94a3b8; /* Labels, captions, hints */
-  --color-text-muted: #475569; /* Placeholder, disabled */
-
-  /* Accent: a secondary color for variety.
-     We'll use a warm teal to contrast the cool brand purple. */
-  --color-accent: #06b6d4;
-
-  /* Status colors: universal meanings (don't rename these) */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-
-  /* ----------------------------------------------------------
-     TYPOGRAPHY
-     
-     Naming: --text-[size-name]
-     These create: text-xs, text-sm, text-lg, etc.
-     
-     Why define these? So every developer uses the same scale.
-     Without this, you get text-[13px], text-[14px], text-[15px]
-     scattered everywhere — visual inconsistency.
-     ---------------------------------------------------------- */
-  --text-xs: 0.75rem; /* 12px — tiny labels */
-  --text-sm: 0.875rem; /* 14px — secondary text */
-  --text-base: 1rem; /* 16px — body text */
-  --text-lg: 1.125rem; /* 18px — slightly larger body */
-  --text-xl: 1.25rem; /* 20px — small headings */
-  --text-2xl: 1.5rem; /* 24px — section headings */
-  --text-3xl: 1.875rem; /* 30px — page headings */
-  --text-4xl: 2.25rem; /* 36px — hero headings */
-
-  /* ----------------------------------------------------------
-     BORDER RADIUS
-     
-     Naming: --radius-[size]
-     Creates: rounded-sm, rounded-md, rounded-lg, etc.
-     
-     Why tokens? Consistency. If your design uses "slightly rounded"
-     everywhere, one token means one change updates everything.
-     ---------------------------------------------------------- */
-  --radius-sm: 0.375rem; /* 6px — small elements like badges */
-  --radius-md: 0.5rem; /* 8px — buttons, inputs */
-  --radius-lg: 0.75rem; /* 12px — cards */
-  --radius-xl: 1rem; /* 16px — panels */
-  --radius-2xl: 1.5rem; /* 24px — modals */
-  --radius-full: 9999px; /* Pill shape */
-
-  /* ----------------------------------------------------------
-     SPACING
-     
-     Only add custom spacing for values you use repeatedly
-     that aren't in Tailwind's default scale (4, 8, 12, 16...).
-     Don't override the defaults — extend them.
-     ---------------------------------------------------------- */
-  --spacing-18: 4.5rem; /* 72px — useful gap between sections */
-  --spacing-22: 5.5rem; /* 88px — navbar height */
+  /* ── SHADOWS ─────────────────────────────────────────────
+     Warm-tinted shadows — not cold gray
+     Real products use colored shadows matching their palette
+  ──────────────────────────────────────────────────────── */
+  --shadow-sm: 0 2px 8px rgba(255, 107, 107, 0.08);
+  --shadow-md: 0 4px 16px rgba(255, 107, 107, 0.12);
+  --shadow-lg: 0 8px 32px rgba(255, 107, 107, 0.16);
 }
 
-/* ============================================================
-   SHADCN CSS VARIABLES
-   
-   WHY THIS BLOCK EXISTS:
-   shadcn components are pre-built but "headless" for colors.
-   They read from these specific variable names (--background,
-   --primary, etc.). If these variables don't exist, shadcn
-   components have no color — they break visually.
-   
-   Think of it as: shadcn gives you the component shell,
-   you fill in the colors via these variables.
-   
-   HOW DARK MODE WORKS:
-   We define two sets — one in :root (light/dark base) and
-   one in .dark class. JavaScript toggles the "dark" class
-   on <html>. The browser then uses the right set.
-   ============================================================ */
-
-/* 
-  We're building a dark app, so we set dark values as default
-  in :root. The .dark class reinforces this (for shadcn compatibility).
-  
-  WHY :root?
-  :root is the <html> element. Variables here are available
-  to every element in the document — global scope.
-*/
+/* ── SHADCN VARIABLES ────────────────────────────────────────
+   Mapped to our warm palette.
+   shadcn reads these — our components auto-match the theme.
+──────────────────────────────────────────────────────────── */
 :root {
-  /* --background: the main page background
-     shadcn uses this for page bg and some component bgs */
-  --background: 240 10% 5%; /* Very dark blue-gray */
+  --background: 43 100% 98%; /* warm white */
+  --foreground: 25 60% 12%; /* warm dark brown */
 
-  /* --foreground: the main text color on background */
-  --foreground: 210 40% 98%; /* Near white */
+  --card: 38 100% 97%;
+  --card-foreground: 25 60% 12%;
 
-  /* --card: background of card components */
-  --card: 240 10% 8%;
+  --popover: 38 100% 97%;
+  --popover-foreground: 25 60% 12%;
 
-  /* --card-foreground: text inside cards */
-  --card-foreground: 210 40% 98%;
-
-  /* --popover: dropdowns, tooltips, floating UI */
-  --popover: 240 10% 10%;
-  --popover-foreground: 210 40% 98%;
-
-  /* --primary: your main action color (buttons, links)
-     This is what bg-primary and text-primary use */
-  --primary: 239 84% 67%; /* Matches our --color-brand */
-  --primary-foreground: 0 0% 100%; /* Text ON primary bg */
-
-  /* --secondary: secondary actions, less emphasis */
-  --secondary: 240 10% 15%;
-  --secondary-foreground: 210 40% 98%;
-
-  /* --muted: disabled, placeholder, subtle backgrounds */
-  --muted: 240 10% 13%;
-  --muted-foreground: 215 20% 65%;
-
-  /* --accent: hover states, subtle highlights */
-  --accent: 240 10% 15%;
-  --accent-foreground: 210 40% 98%;
-
-  /* --destructive: delete, error, danger actions */
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-
-  /* --border: lines, dividers, input borders */
-  --border: 240 10% 18%;
-
-  /* --input: input field borders specifically */
-  --input: 240 10% 18%;
-
-  /* --ring: focus ring color (accessibility) 
-     This appears when you tab-navigate to elements */
-  --ring: 239 84% 67%;
-
-  /* --radius: shadcn's border radius token
-     Note: shadcn uses ONE radius variable, not multiple.
-     They add/subtract from it internally. */
-  --radius: 0.5rem;
-}
-
-/* 
-  .dark class: Applied by JavaScript to <html> element.
-  Since we're already dark in :root, .dark values are the same.
-  If you wanted a light mode default, you'd put light values
-  in :root and dark values here.
-*/
-.dark {
-  --background: 240 10% 5%;
-  --foreground: 210 40% 98%;
-  --card: 240 10% 8%;
-  --card-foreground: 210 40% 98%;
-  --popover: 240 10% 10%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 239 84% 67%;
+  --primary: 0 100% 71%; /* coral */
   --primary-foreground: 0 0% 100%;
-  --secondary: 240 10% 15%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 240 10% 13%;
-  --muted-foreground: 215 20% 65%;
-  --accent: 240 10% 15%;
-  --accent-foreground: 210 40% 98%;
+
+  --secondary: 38 100% 93%; /* light cream */
+  --secondary-foreground: 25 60% 12%;
+
+  --muted: 38 60% 92%;
+  --muted-foreground: 25 30% 45%;
+
+  --accent: 142 44% 60%; /* mint */
+  --accent-foreground: 25 60% 12%;
+
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 240 10% 18%;
-  --input: 240 10% 18%;
-  --ring: 239 84% 67%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 35 40% 88%;
+  --input: 35 40% 88%;
+  --ring: 0 100% 71%; /* coral focus ring */
+  --radius: 0.875rem;
 }
 
-/* ============================================================
-   BASE STYLES
-   
-   These are global resets and defaults applied to raw HTML
-   elements. Without this block:
-   - Browsers add inconsistent margins to <body>
-   - Font smoothing looks jagged on Mac
-   - Scrolling is jumpy on sections
-   ============================================================ */
+/* ── BASE STYLES ─────────────────────────────────────────────
+──────────────────────────────────────────────────────────── */
 @layer base {
-  /* 
-    WHY @layer base?
-    Tailwind has three layers: base, components, utilities.
-    Base = lowest specificity (HTML element styles)
-    Components = medium specificity (class combos)
-    Utilities = highest specificity (single-purpose classes)
-    
-    Putting your resets in @layer base means utility classes
-    (like text-red-500) will always win over base styles.
-    This is correct — utility classes should override defaults.
-  */
-
   * {
-    /* box-sizing: border-box — one of the most important CSS rules.
-       By default, padding ADDS to width. So width:200px + padding:20px
-       = 240px total. WRONG. border-box makes padding count INSIDE.
-       200px + padding:20px = 200px total. This is what you expect. */
     box-sizing: border-box;
-
-    /* Remove all default margins/padding from everything.
-       Browsers add opinionated spacing (e.g., h1 has margin-top).
-       We reset these so WE control all spacing explicitly. */
     margin: 0;
     padding: 0;
-
-    /* Smooth borders using our token */
-    border-color: hsl(var(--border));
+    border-color: var(--color-border);
   }
 
   html {
-    /* scroll-behavior: smooth — anchor links (#section) scroll
-       smoothly instead of jumping. */
     scroll-behavior: smooth;
-
-    /* Prevents layout shift when scrollbar appears/disappears */
     scrollbar-gutter: stable;
   }
 
   body {
-    /* Apply our background and text colors globally.
-       Every page inherits these unless overridden. */
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
 
-    /* font-family stack:
-       1. system-ui — use the OS default (San Francisco on Mac,
-          Segoe UI on Windows) — fast, no download, looks native
-       2. -apple-system — Safari fallback
-       3. sans-serif — ultimate fallback */
-    font-family:
-      system-ui,
-      -apple-system,
-      sans-serif;
-
-    /* antialiased — smooths font rendering on screens.
-       Without this, fonts look slightly pixelated/heavy on Mac. */
+    /* Body uses our clean sans font */
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-
-    /* Prevents text from overflowing its container horizontally */
     overflow-x: hidden;
-
-    /* min-h-screen equivalent — body always fills viewport */
     min-height: 100vh;
-
-    /* Line height for comfortable reading */
-    line-height: 1.5;
+    line-height: 1.6;
   }
 
-  /* Images should never overflow their containers by default */
+  /* Display font for all headings */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    line-height: 1.2;
+    color: var(--color-text-primary);
+  }
+
   img,
   video {
     max-width: 100%;
     display: block;
   }
 
-  /* Interactive elements should show pointer cursor */
   button,
   [role="button"],
   a {
     cursor: pointer;
   }
 
-  /* Remove ugly default focus styles — we'll add our own with :focus-visible */
   *:focus {
     outline: none;
   }
 
-  /* Add accessible focus ring only for keyboard navigation.
-     :focus-visible = only when using keyboard, not mouse clicks.
-     This is important for accessibility. */
   *:focus-visible {
-    outline: 2px solid hsl(var(--ring));
+    outline: 2px solid var(--color-coral);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
 }
 
-/* ============================================================
-   CUSTOM SCROLLBAR (optional but portfolio-worthy)
-   
-   The default scrollbar looks out of place on a dark themed app.
-   These styles apply a custom scrollbar on webkit browsers
-   (Chrome, Safari, Edge).
-   ============================================================ */
+/* ── CUSTOM SCROLLBAR ────────────────────────────────────────
+   Warm-tinted, thin, matches the palette
+──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px; /* Thin scrollbar */
+  width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: hsl(var(--background));
+  background: var(--color-background);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: var(--color-border);
   border-radius: var(--radius-full);
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
+  background: var(--color-text-muted);
 }
 
-/* 
+/* ── UTILITY CLASSES ─────────────────────────────────────────
+   Reusable patterns we'll use across the whole app.
+   These are ONE-OFF classes for things Tailwind doesn't cover.
+──────────────────────────────────────────────────────────── */
 
-## Folder Structure — The WHY
+/* Warm card — the base style for every card in the app */
+.card-warm {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
 
-Before TypeScript, let me explain each folder so you understand every decision:
-```
-app/              WHY: Next.js App Router convention. Every folder
-                  = a URL route. Next.js REQUIRES this name.
-                  BREAK IF MOVED: Your entire app stops routing.
-                  REMEMBER: layout.tsx and page.tsx are special names
-                  Next.js looks for specifically.
+.card-warm:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
 
-components/       WHY: Reusable UI pieces that aren't routes.
-                  Real convention: keep components here, NOT in app/.
-                  BREAK IF MOVED: Nothing breaks technically, but you
-                  violate separation of concerns — hard to find things.
-                  REMEMBER: components/ = UI building blocks.
-                            app/ = routes and pages.
+/* Gradient text — for the hero heading */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-coral), var(--color-peach));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-lib/              WHY: Pure logic functions — no UI, no React.
-                  API calls, data transformations, utilities.
-                  Real convention: "lib" or "utils" or "services".
-                  BREAK IF MOVED: Nothing breaks, but mixing logic
-                  into components makes them untestable and reusable.
-                  REMEMBER: If it doesn't return JSX, it belongs in lib/.
+/* Pill badge — ingredient tags, category labels */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1;
+}
 
-types/            WHY: All TypeScript interfaces in one place.
-                  Every file imports types from here.
-                  BREAK IF MOVED: You'd scatter types everywhere,
-                  leading to duplicates and mismatches.
-                  REMEMBER: One types file = one source of truth.
-
-public/           WHY: Static assets (images, fonts, favicon).
-                  Next.js REQUIRES this name — serves files at root URL.
-                  public/logo.png → yoursite.com/logo.png
-                  BREAK IF MOVED: Static file serving breaks. */
+/* Squiggly underline on hover — playful detail */
+.link-playful {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--color-coral);
+  text-underline-offset: 4px;
+}
