@@ -9,6 +9,12 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 export default function Fridge() {
   const mountRef = useRef<HTMLDivElement>(null);
 
+  const getSafeSize = (el: HTMLDivElement) => {
+    const w = Math.max(el.clientWidth, 320);
+    const h = Math.max(el.clientHeight, 420);
+    return { w, h };
+  };
+
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
@@ -18,8 +24,7 @@ export default function Fridge() {
     scene.background = new THREE.Color("#fffdf7"); // warm cream
 
     // ── CAMERA ─────────────────────────────────────────────
-    const width = mount.clientWidth;
-    const height = mount.clientHeight;
+    const { w: width, h: height } = getSafeSize(mount);
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     camera.position.set(0, 0, 6);
 
@@ -276,8 +281,7 @@ export default function Fridge() {
     // ── RESIZE ─────────────────────────────────────────────
     function handleResize() {
       if (!mount) return;
-      const w = mount.clientWidth;
-      const h = mount.clientHeight;
+      const { w, h } = getSafeSize(mount);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -313,8 +317,7 @@ export default function Fridge() {
   return (
     <div
       ref={mountRef}
-      className="w-full h-full"
-      style={{ minHeight: "500px" }}
+      className="w-[min(92vw,560px)] h-[min(75vh,700px)] min-h-[500px]"
     />
   );
 }
