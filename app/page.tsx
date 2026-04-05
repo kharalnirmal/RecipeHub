@@ -18,7 +18,7 @@ const page = () => {
     <LoadingScreen onComplete={() => setLoading(false)} />
   ) : (
     <main className="w-full min-h-screen">
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center gap-3">
         <div className="">
           <Fridge />
         </div>
