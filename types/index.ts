@@ -12,7 +12,7 @@ export interface Recipe {
   area: string;
   category: string;
   ingredients: string[];
-  measure: string[];
+  measures: string[];
   instructions: string;
   youtubeUrl?: string;
 }

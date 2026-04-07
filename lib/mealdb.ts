@@ -31,11 +31,28 @@ function transformMeal(raw: RawMeal): Recipe {
   //the mealDb stores Them as strIngredient!....strINgredients20
   //we loop ad collect non-empty ones
 
-  const ingredient: string[] = [];
+  const ingredients: string[] = [];
   const measures: string[] = [];
 
   for (let i = 1; i <= 20; i++) {
     const ingredient = raw[`strIngredients${i}`];
     const measure = raw[`strMeasure${i}`];
+
+    if (ingredient && ingredient.trim() !== "") {
+      ingredients.push(ingredient.trim());
+      measures.push(measure?.trim() ?? "");
+    }
   }
+
+  return {
+    id: raw.idMeal,
+    name: raw.strMeal,
+    image: raw.strMealThumb,
+    area: raw.strArea ?? "Unknown",
+    category: raw.strCategory ?? "Unknown",
+    ingredients,
+    measures,
+    instructions: raw.strInstructions ?? "",
+    youtubeUrl: raw.strYoutube ?? undefined,
+  };
 }
