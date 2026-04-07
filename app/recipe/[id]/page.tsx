@@ -1,7 +1,6 @@
 import { getRecipeById } from "@/lib/mealdb";
 import { Link } from "lucide-react";
 import { notFound } from "next/navigation";
-import React from "react";
 
 interface PageProps {
   params: Promise<{ id: string }>;

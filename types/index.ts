@@ -47,3 +47,20 @@ export interface ApiResponse<T> {
   error: string | null;
   loading: boolean;
 }
+
+// ─────────────────────────────────────────────────────────────
+// WHY: This interface defines exactly what we expect back from
+// our AI. We designed it not OpenAI. We tell the AI to match
+// this shape via our prompt.
+// ─────────────────────────────────────────────────────────────
+
+export interface AIRecipeSuggestion {
+  name: string; // recipe name
+  description: string; //1-2 senstence description
+  cookTime: string; //e.g :"20 minutes"-string not number bacause Ai might say "20-25 minutes"
+  difficulty: "easy" | "medium" | "hard";
+
+  whyItWorks: string; // e.g., "Eggs provide protein while cheese
+  // adds fat for satiety" — this is the
+  // "AI value add" that MealDB can't give us
+}
