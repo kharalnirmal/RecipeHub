@@ -56,3 +56,65 @@ function transformMeal(raw: RawMeal): Recipe {
     youtubeUrl: raw.strYoutube ?? undefined,
   };
 }
+
+// ── SEARCH BY INGREDIENTS ────────────────────────────────
+// Takes array of ingredient names
+// Returns array of matching recipes
+// Used by: recipes/page.tsx
+
+export async function searchByIngredients(
+  ingredients: string[],
+): Promise<Recipe[]> {
+  if (ingredients.length === 0) return [];
+
+  try {
+    //sEARCH BY First ingredients
+    const response = await fetch(`${BASE}/filter.php?i=${ingredients[0]}`);
+
+    // Check if response is ok (status 200-299)
+    // fetch() doesn't throw on 404 — we check manually
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data: RawSearchResponse = await response.json();
+
+    if (!data.meals) return [];
+
+    const fullMeals = await Promise.all(
+      data.meals.slice(0, 12).map((meal) => getRecipeById(meal.idMeal)),
+    );
+
+    // filter(Boolean) removes any null results
+    // (getRecipeById returns null if fetch fails)
+    return fullMeals.filter(Boolean) as Recipe[];
+  } catch (error) {
+    console.error("searchByIngredients failed:", error);
+    return [];
+    // return empty array on error — never crash the page
+  }
+}
+
+// ── GET RECIPE BY ID ─────────────────────────────────────
+// Takes a meal ID string
+// Returns full Recipe or null if not found
+// Used by: recipe/[id]/page.tsx AND searchByIngredients above
+
+export async function getRecipeById(id: string): Promise<Recipe | null> {
+  try {
+    const response = await fetch(`${BASE}/lookup.php?i=${id}`);
+
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+    const data: RawSearchResponse = await response.json();
+
+    // lookup returns null if ID doesn't exist
+    if (!data.meals || data.meals.length === 0) return null;
+
+    // transform raw → our Recipe type
+    return transformMeal(data.meals[0]);
+  } catch (error) {
+    console.error("getRecipeById failed:", error);
+    return null;
+  }
+}
