@@ -6,9 +6,14 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 // In production you'd validate it exists first
 
 export const geminiModel = genAI.getGenerativeModel({
-  model: "gemini-pro",
-  // gemini-1.5-flash = fast, free tier, perfect for JSON tasks
-  // gemini-1.5-pro = smarter but slower, still free tier
+  model: "gemini-1.5-flash",
+  generationConfig: {
+    responseMimeType: "application/json",
+    temperature: 0.4,
+    topP: 0.9,
+  },
+  // gemini-1.5-flash is fast and stable for structured JSON responses.
+  // Lower temperature keeps output more deterministic and consistent.
 });
 
 export default genAI;

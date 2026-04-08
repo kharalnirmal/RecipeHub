@@ -21,6 +21,9 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
 
   const ingredients = ingredientsParam.split(",").filter(Boolean);
   const recipes = await searchByIngredients(ingredients);
+  const backHref = ingredientsParam
+    ? `/recipes?ingredients=${ingredientsParam}`
+    : "/";
 
   return (
     <main className="bg-background min-h-screen">
@@ -108,6 +111,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
                     <RecipeCard
                       recipe={recipe}
                       matchedIngredients={ingredients}
+                      backHref={backHref}
                     />
                   </div>
                 ))}

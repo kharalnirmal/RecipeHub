@@ -5,11 +5,14 @@ import { notFound } from "next/navigation";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }
-const RecipeDetailPage = async ({ params }: PageProps) => {
+const RecipeDetailPage = async ({ params, searchParams }: PageProps) => {
   const { id } = await params;
+  const { from } = await searchParams;
 
   const recipe = await getRecipeById(id);
+  const safeBackHref = from?.startsWith("/") ? from : "/recipes";
 
   // Step 3: handle not found
   // notFound() is a Next.js function
@@ -40,7 +43,7 @@ const RecipeDetailPage = async ({ params }: PageProps) => {
         {/* Recipe name on top of image */}
         <div className="bottom-0 left-0 absolute p-8">
           <Link
-            href="/recipes"
+            href={safeBackHref}
             className="inline-block bg-coral-light mb-4 px-5 py-3 rounded-xl text-sm no-underline"
             style={{ color: "rgba(255,255,255,0.7)" }}
           >
@@ -65,85 +68,13 @@ const RecipeDetailPage = async ({ params }: PageProps) => {
 
       {/* Content */}
       <div
-        className="gap-8 grid mx-auto p-8"
-        style={{
-          maxWidth: "1100px",
-          gridTemplateColumns: "1fr 2fr",
-        }}
+        className="gap-6 lg:gap-8 grid grid-cols-1 lg:grid-cols-2 mx-auto p-4 sm:p-8"
+        style={{ maxWidth: "1180px" }}
       >
-        {/* LEFT — Ingredients */}
-        <div>
-          <div className="p-6 card-warm">
-            <h2
-              className="mb-4 text-2xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Ingredients 🧺
-            </h2>
-
-            {/* ingredients and measures are parallel arrays
-                ingredients[0] pairs with measures[0]
-                same index = same ingredient */}
-            <ul className="flex flex-col gap-3">
-              {recipe.ingredients.map((ingredient, index) => (
-                <li
-                  key={ingredient}
-                  className="flex justify-between items-center py-2"
-                  style={{ borderBottom: "1px solid var(--color-border)" }}
-                >
-                  <span
-                    className="font-medium"
-                    style={{ color: "var(--color-text-primary)" }}
-                  >
-                    {ingredient}
-                  </span>
-                  <span
-                    className="text-sm"
-                    style={{ color: "var(--color-text-muted)" }}
-                  >
-                    {recipe.measures[index]}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* RIGHT — Instructions + YouTube */}
-        <div className="flex flex-col gap-6">
-          {/* Instructions */}
-          <div className="p-6 card-warm">
-            <h2
-              className="mb-4 text-2xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Instructions 👨‍🍳
-            </h2>
-
-            {/* Split instructions by newline into steps
-                filter(Boolean) removes empty lines
-                Some instructions have \r\n or just \n */}
-            {recipe.instructions
-              .split(/\r?\n/)
-              .filter(Boolean)
-              .map((step, index) => (
-                <div key={index} className="flex gap-4 mb-4">
-                  {/* Step number */}
-                  <span
-                    className="flex flex-shrink-0 justify-center items-center rounded-full w-8 h-8 font-medium text-white text-sm"
-                    style={{ background: "var(--color-coral)" }}
-                  >
-                    {index + 1}
-                  </span>
-                  <p style={{ color: "var(--color-text-secondary)" }}>{step}</p>
-                </div>
-              ))}
-          </div>
-
-          {/* YouTube — only shows if recipe has a video */}
-          {/* This is called conditional rendering */}
+        {/* LEFT — Video + Ingredients */}
+        <div className="flex flex-col gap-6 h-full">
           {recipe.youtubeUrl && (
-            <div className="p-6 card-warm">
+            <div className="p-5 sm:p-6 h-full card-warm">
               <h2
                 className="mb-4 text-2xl"
                 style={{ fontFamily: "var(--font-display)" }}
@@ -151,15 +82,9 @@ const RecipeDetailPage = async ({ params }: PageProps) => {
                 Watch It Being Made 🎬
               </h2>
 
-              {/* Convert YouTube watch URL to embed URL
-                  youtube.com/watch?v=ABC → youtube.com/embed/ABC
-                  Browsers need embed format for iframes */}
               <div
                 className="relative rounded-lg w-full overflow-hidden"
                 style={{ paddingTop: "56.25%" }}
-                // 56.25% = 16:9 aspect ratio
-                // padding-top trick: makes div maintain ratio
-                // as width changes (responsive video)
               >
                 <iframe
                   className="absolute inset-0 w-full h-full"
@@ -170,6 +95,72 @@ const RecipeDetailPage = async ({ params }: PageProps) => {
               </div>
             </div>
           )}
+
+          <div className="p-5 sm:p-6 h-full card-warm">
+            <h2
+              className="mb-4 text-2xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Ingredients 🧺
+            </h2>
+
+            {/* ingredients and measures are parallel arrays
+                ingredients[0] pairs with measures[0]
+                same index = same ingredient */}
+            <ul className="flex flex-wrap gap-3">
+              {recipe.ingredients.map((ingredient, index) => (
+                <li
+                  key={ingredient}
+                  className="inline-flex items-center gap-2 px-4 py-2"
+                  style={{
+                    background: "var(--color-surface-raised)",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <span className="font-medium text-text-primary">
+                    {ingredient}
+                  </span>
+                  {recipe.measures[index] && (
+                    <span className="text-text-muted text-sm whitespace-nowrap">
+                      ({recipe.measures[index]})
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* RIGHT — Instructions */}
+        <div className="p-5 sm:p-6 h-full min-h-130 card-warm">
+          <h2
+            className="mb-4 text-2xl"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Instructions 👨‍🍳
+          </h2>
+
+          {/* Split instructions by newline into steps
+              filter(Boolean) removes empty lines
+              Some instructions have \r\n or just \n */}
+          <div className="space-y-4">
+            {recipe.instructions
+              .split(/\r?\n/)
+              .filter(Boolean)
+              .map((step, index) => (
+                <div key={index} className="flex gap-4">
+                  {/* Step number */}
+                  <span
+                    className="flex justify-center items-center rounded-full w-8 h-8 font-medium text-white text-sm shrink-0"
+                    style={{ background: "var(--color-coral)" }}
+                  >
+                    {index + 1}
+                  </span>
+                  <p style={{ color: "var(--color-text-secondary)" }}>{step}</p>
+                </div>
+              ))}
+          </div>
         </div>
       </div>
     </main>

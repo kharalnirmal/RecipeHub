@@ -224,11 +224,30 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
     // ── DOOR STATE ─────────────────────────────────────────
     let isDoorOpen = false;
 
+    function animateItemIcons(item: THREE.Group, visible: boolean) {
+      item.traverse((obj) => {
+        if (obj instanceof THREE.Sprite) {
+          const material = obj.material as THREE.SpriteMaterial;
+          gsap.to(material, {
+            opacity: visible ? 1 : 0,
+            duration: visible ? 0.35 : 0.28,
+            ease: visible ? "power2.out" : "power1.inOut",
+            overwrite: true,
+          });
+        }
+      });
+    }
+
     function openDoor() {
       if (isDoorOpen) return;
       window.sessionStorage.setItem("fridgeai-fridge-click-hint-seen", "1");
       setShowHint(false);
       isDoorOpen = true;
+
+      ingredientItems.forEach((item) => {
+        item.visible = true;
+        animateItemIcons(item, true);
+      });
 
       ingredientItems.forEach((item) => {
         const baseZ =
@@ -253,6 +272,13 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
       setShowHint(false);
       isDoorOpen = !isDoorOpen;
 
+      if (isDoorOpen) {
+        ingredientItems.forEach((item) => {
+          item.visible = true;
+          animateItemIcons(item, true);
+        });
+      }
+
       ingredientItems.forEach((item) => {
         const baseZ =
           typeof item.userData.baseZ === "number" ? item.userData.baseZ : 0.2;
@@ -271,10 +297,19 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
           ease: "power2.out",
         });
       } else {
+        ingredientItems.forEach((item) => {
+          animateItemIcons(item, false);
+        });
+
         gsap.to(doorGroup.rotation, {
           y: 0,
           duration: 0.6,
           ease: "power2.inOut",
+          onComplete: () => {
+            ingredientItems.forEach((item) => {
+              item.visible = false;
+            });
+          },
         });
       }
     }
@@ -311,6 +346,7 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
       [0.35, -0.95, 0.16],
       [0, -1.2, 0.14],
     ];
+    const maxVisibleItems = shelfSlots.length;
 
     const getStableIndex = (id: string) => {
       let hash = 0;
@@ -323,6 +359,10 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
     const pickSlotIndex = (id: string) => {
       if (slotById.has(id)) {
         return slotById.get(id)!;
+      }
+
+      if (slotById.size >= shelfSlots.length) {
+        return null;
       }
 
       const preferred = getStableIndex(id);
@@ -340,8 +380,7 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
         }
       }
 
-      slotById.set(id, preferred);
-      return preferred;
+      return null;
     };
 
     function createEmojiSprite(emoji: string) {
@@ -364,14 +403,20 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
         map: texture,
         transparent: true,
         depthWrite: false,
+        depthTest: false,
+        opacity: 1,
       });
       const sprite = new THREE.Sprite(material);
       sprite.scale.set(0.34, 0.34, 0.34);
-      sprite.position.set(0, 0.2, 0.09);
+      sprite.position.set(0, 0.2, 0);
+      sprite.renderOrder = 10;
       return sprite;
     }
 
     function addIngredientSphere(id: string, category: string) {
+      if (ingredientItems.has(id)) return;
+      if (ingredientItems.size >= maxVisibleItems) return;
+
       const item = new THREE.Group();
       const body = new THREE.Mesh(
         new RoundedBoxGeometry(0.28, 0.2, 0.2, 3, 0.05),
@@ -386,13 +431,20 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
 
       const ingredient = getIngredientById(id);
       const emojiSprite = createEmojiSprite(ingredient?.emoji ?? "🍽️");
+      emojiSprite.position.z = 0;
+      (emojiSprite.material as THREE.SpriteMaterial).opacity = isDoorOpen
+        ? 1
+        : 0;
+
       item.add(body);
       item.add(emojiSprite);
 
       const slotIndex = pickSlotIndex(id);
+      if (slotIndex === null) return;
       const [x, y, z] = shelfSlots[slotIndex];
       item.position.set(x, y, z);
       item.userData.baseZ = z;
+      item.visible = isDoorOpen;
 
       scene.add(item);
       ingredientItems.set(id, item);
@@ -532,7 +584,7 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
 
     // Wait one frame to ensure mounted
     const timer = setTimeout(() => {
-      for (const ingredient of INGREDIENTS) {
+      for (const ingredient of INGREDIENTS.slice(0, 12)) {
         addSphereRef.current?.(ingredient.id, ingredient.category);
       }
       selectedPrevRef.current = [];
@@ -542,7 +594,7 @@ const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
   }, []);
 
   return (
-    <div className="relative w-full h-[440px] md:h-[520px]">
+    <div className="relative w-full h-110 md:h-130">
       {showHint && (
         <div className="top-3 left-3 z-10 absolute bg-surface/95 px-3 py-2 border border-border rounded-lg pointer-events-none">
           <p className="font-medium text-text-secondary text-xs">

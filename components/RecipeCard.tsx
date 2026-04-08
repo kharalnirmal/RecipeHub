@@ -6,11 +6,13 @@ import type { Recipe } from "@/types";
 interface RecipeCardProps {
   recipe: Recipe;
   matchedIngredients?: string[];
+  backHref?: string;
 }
 
 export default function RecipeCard({
   recipe,
   matchedIngredients = [],
+  backHref,
 }: RecipeCardProps) {
   // Find which ingredients in the recipe match the search ingredients
   const matched = matchedIngredients
@@ -26,8 +28,15 @@ export default function RecipeCard({
       ? Math.round((matched.length / matchedIngredients.length) * 100)
       : 0;
 
+  const detailHref = backHref
+    ? {
+        pathname: `/recipe/${recipe.id}`,
+        query: { from: backHref },
+      }
+    : `/recipe/${recipe.id}`;
+
   return (
-    <Link href={`/recipe/${recipe.id}`} className="no-underline">
+    <Link href={detailHref} className="no-underline">
       <article
         className="flex flex-col hover:shadow-lg active:shadow-md h-full overflow-hidden transition-all duration-200 cursor-pointer"
         style={{
