@@ -2,7 +2,7 @@
 
 **Cook with what you already have.**
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Three.js](https://img.shields.io/badge/Three.js-r183-black?style=for-the-badge&logo=three.js)](https://threejs.org/)
@@ -54,12 +54,11 @@ Integration with **TheMealDB API** to provide:
 
 | Category | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Framework** | Next.js 15 (App Router) | Server Components, Streaming, & Optimized Routing |
+| **Framework** | Next.js 16 (App Router) | Server Components, Streaming, & Optimized Routing |
 | **Language** | TypeScript | Type safety and developer productivity |
 | **Styling** | Tailwind CSS v4 + shadcn/ui | Utility-first styling with custom design tokens |
 | **3D Engine** | Three.js + @gsap/react | High-performance 3D rendering and animations |
 | **AI Models** | Google Gemini + OpenAI | Structured recipe generation and suggestions |
-| **Animations** | Lottie (DotLottie) | Lightweight, high-quality vector animations |
 | **Deployment** | Vercel | Global Edge Network and CI/CD |
 
 ---
