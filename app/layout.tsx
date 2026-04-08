@@ -19,9 +19,9 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: " FridgeAI — Cook What You Have",
+    default: " FridgeHub — Cook What You Have",
     // Shown on the home page and any page without its own title
-    template: "%s | FridgeAI",
+    template: "%s | FridgeHub",
     // Other pages set title: "Pasta Carbonara"
     // This template renders it as: "Pasta Carbonara | FridgeAI"
     // %s = placeholder for the page's title
@@ -34,10 +34,10 @@ export const metadata: Metadata = {
   // Without OG tags: just a bare URL. With them: rich preview.
 
   openGraph: {
-    title: "FridgeAI-Cook what you Have",
+    title: "FridgeHub-Cook what you Have",
     description: "Turn  your fridge ingredients into delicious recipes ",
-    url: "https://fridgeai.vercel.app",
-    siteName: "FridgeAI",
+    url: "https://fridgehub.vercel.app/",
+    siteName: "FridgeHub",
     images: [
       {
         url: "/og-image.png",
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     // summary_large_image = big image preview on Twitter/X
-    title: "FridgeAI — Cook What You Have",
+    title: "FridgeHub — Cook What You Have",
     description: "Turn your fridge ingredients into delicious recipes.",
     images: ["/og-image.png"],
   },
