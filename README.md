@@ -1,36 +1,146 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍳 FridgeHub
 
-## Getting Started
+**Cook with what you already have.**
 
-First, run the development server:
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![Three.js](https://img.shields.io/badge/Three.js-r183-black?style=for-the-badge&logo=three.js)](https://threejs.org/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deploy-black?style=for-the-badge&logo=vercel)](https://fridgehub.vercel.app)
+
+---
+
+## 🌟 Overview
+
+**FridgeHub** is a modern, full-stack web application designed to solve the "what's for dinner?" dilemma. By simply selecting the ingredients already in your kitchen, FridgeHub provides you with real-world recipes and creative AI-powered suggestions.
+
+Built as a high-performance portfolio project, it demonstrates mastery in **Next.js 15 App Router**, **Three.js 3D rendering**, **AI Integration (Gemini & OpenAI)**, and **Modern React Patterns**.
+
+🌐 **Live Demo:** [fridgehub.vercel.app](https://fridgehub.vercel.app)
+
+---
+
+## ✨ Key Features
+
+### 🧊 Interactive 3D Fridge
+A fully interactive fridge built with **Three.js** and **GSAP**.
+*   **Dynamic Animations:** The door opens and closes as you interact with the ingredient picker.
+*   **Visual Feedback:** Selected ingredients appear inside the fridge as colored 3D spheres.
+*   **Sticker System:** Custom PNG stickers decorate the fridge door for a playful, modern aesthetic.
+
+### 🥗 Smart Ingredient Picker
+A category-based selection system (Protein, Vegetable, Dairy, Spice, Grain) that makes building your "basket" intuitive and fast.
+
+### 🤖 AI Recipe Assistant
+Powered by **Google Gemini 1.5 Flash** (with OpenAI fallback).
+*   **Creative Suggestions:** Get unique recipes tailored exactly to your selected ingredients.
+*   **Contextual Logic:** The AI explains *why* the ingredients work together.
+*   **Structured Data:** Clean, fast, and structured JSON responses for a seamless UI experience.
+
+### 📖 Real-World Recipes
+Integration with **TheMealDB API** to provide:
+*   Full ingredient lists and measurements.
+*   Step-by-step cooking instructions.
+*   YouTube video embeds for visual learners.
+
+### ⚡ Premium UX
+*   **Lottie Animations:** A smooth, custom pan-animation loading screen.
+*   **Responsive Design:** Optimized for everything from mobile phones to ultra-wide monitors.
+*   **Design Tokens:** A custom warm-themed design system built on Tailwind CSS v4.
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | Next.js 15 (App Router) | Server Components, Streaming, & Optimized Routing |
+| **Language** | TypeScript | Type safety and developer productivity |
+| **Styling** | Tailwind CSS v4 + shadcn/ui | Utility-first styling with custom design tokens |
+| **3D Engine** | Three.js + @gsap/react | High-performance 3D rendering and animations |
+| **AI Models** | Google Gemini + OpenAI | Structured recipe generation and suggestions |
+| **Animations** | Lottie (DotLottie) | Lightweight, high-quality vector animations |
+| **Deployment** | Vercel | Global Edge Network and CI/CD |
+
+---
+
+## 📂 Project Architecture
+
+FridgeHub follows a strict **Separation of Concerns** principle:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+app/
+├── api/suggest/         # Gemini/OpenAI backend API routes
+├── recipe/[id]/         # Dynamic recipe detail pages
+├── recipes/             # Search results and filtering logic
+└── page.tsx             # Home: 3D Fridge + Ingredient Grid
+components/
+├── Fridge.tsx           # Three.js Canvas & 3D Logic
+├── IngredientGrid.tsx   # Tabbed ingredient selection UI
+├── AIPanel.tsx          # AI Suggestion interface & animations
+└── LoadingScreen.tsx    # Lottie-powered intro sequence
+lib/
+├── gemini.ts            # Google Generative AI configuration
+├── mealdb.ts            # TheMealDB API transformation layer
+└── ingredients.ts       # Central ingredient data & helpers
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
+*   Node.js 18+
+*   npm / pnpm / yarn
+*   API Keys: `GEMINI_API_KEY` or `OPENAI_API_KEY`
 
-## Learn More
+### Installation
 
-To learn more about Next.js, take a look at the following resources:
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/kharalnirmal/RecipeHub.git
+    cd RecipeHub
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3.  **Environment Setup**
+    Create a `.env.local` file in the root:
+    ```env
+    GEMINI_API_KEY=your_gemini_key_here
+    OPENAI_API_KEY=your_openai_key_here
+    ```
 
-## Deploy on Vercel
+4.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
+    Visit `http://localhost:3000` to see FridgeHub in action.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧠 Core Concepts Learned
+
+*   **Hybrid Rendering:** Balancing **Server Components** for data fetching and **Client Components** for heavy 3D interactivity.
+*   **State Lifting:** Managing global ingredient state in `page.tsx` to synchronize the 3D Fridge and the UI Grid.
+*   **Data Transformation:** Building a robust transformation layer in `lib/` to normalize raw API data into clean, typed internal schemas.
+*   **3D Memory Management:** Properly disposing of Three.js geometries and textures to prevent memory leaks in a React environment.
+
+---
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+Built with ❤️ by [Nirmal Kharal](https://github.com/kharalnirmal)
