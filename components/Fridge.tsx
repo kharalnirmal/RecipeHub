@@ -1,13 +1,45 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, forwardRef } from "react";
 import * as THREE from "three";
 import { gsap } from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { getIngredientById, INGREDIENTS } from "@/lib/ingredients";
 
-export default function Fridge() {
+type FridgeProps = {
+  selectedIds: string[];
+};
+
+export type FridgeHandle = {
+  openDoor: () => void;
+};
+
+const Fridge = forwardRef<FridgeHandle, FridgeProps>(({ selectedIds }, ref) => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const addSphereRef = useRef<((id: string, category: string) => void) | null>(
+    null,
+  );
+  const removeSphereRef = useRef<((id: string) => void) | null>(null);
+  const openDoorRef = useRef<(() => void) | null>(null);
+  const selectedPrevRef = useRef<string[]>([]);
+  const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+    const hasSeenHint =
+      window.sessionStorage.getItem("fridgeai-fridge-click-hint-seen") === "1";
+    setShowHint(!hasSeenHint);
+  }, []);
+
+  // Expose the openDoor method via ref
+  useEffect(() => {
+    if (!openDoorRef.current || !ref) return;
+    if (typeof ref === "function") {
+      ref({ openDoor: openDoorRef.current });
+    } else {
+      ref.current = { openDoor: openDoorRef.current };
+    }
+  }, [ref]);
 
   const getSafeSize = (el: HTMLDivElement) => {
     const w = Math.max(el.clientWidth, 320);
@@ -21,12 +53,15 @@ export default function Fridge() {
 
     // ── SCENE ──────────────────────────────────────────────
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#fffdf7"); // warm cream
+    const bgFromTheme = getComputedStyle(document.documentElement)
+      .getPropertyValue("--color-background")
+      .trim();
+    scene.background = new THREE.Color(bgFromTheme || "#fffdf7");
 
     // ── CAMERA ─────────────────────────────────────────────
     const { w: width, h: height } = getSafeSize(mount);
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 6);
+    camera.position.set(0, 0, 5.2);
 
     // ── RENDERER ───────────────────────────────────────────
     const renderer = new THREE.WebGLRenderer({
@@ -75,6 +110,8 @@ export default function Fridge() {
         color: "#fce4ec", // soft pink — playful and cute
         roughness: 0.85,
         metalness: 0.0,
+        transparent: true,
+        opacity: 0.42,
       }),
     );
     scene.add(fridgeBody);
@@ -187,8 +224,45 @@ export default function Fridge() {
     // ── DOOR STATE ─────────────────────────────────────────
     let isDoorOpen = false;
 
-    function handleClick() {
+    function openDoor() {
+      if (isDoorOpen) return;
+      window.sessionStorage.setItem("fridgeai-fridge-click-hint-seen", "1");
+      setShowHint(false);
+      isDoorOpen = true;
+
+      ingredientItems.forEach((item) => {
+        const baseZ =
+          typeof item.userData.baseZ === "number" ? item.userData.baseZ : 0.2;
+        gsap.to(item.position, {
+          z: isDoorOpen ? baseZ + 0.42 : baseZ,
+          duration: isDoorOpen ? 0.55 : 0.45,
+          ease: isDoorOpen ? "power2.out" : "power2.inOut",
+          overwrite: true,
+        });
+      });
+
+      gsap.to(doorGroup.rotation, {
+        y: -Math.PI / 2,
+        duration: 0.8,
+        ease: "power2.out",
+      });
+    }
+
+    function toggleDoor() {
+      window.sessionStorage.setItem("fridgeai-fridge-click-hint-seen", "1");
+      setShowHint(false);
       isDoorOpen = !isDoorOpen;
+
+      ingredientItems.forEach((item) => {
+        const baseZ =
+          typeof item.userData.baseZ === "number" ? item.userData.baseZ : 0.2;
+        gsap.to(item.position, {
+          z: isDoorOpen ? baseZ + 0.42 : baseZ,
+          duration: isDoorOpen ? 0.55 : 0.45,
+          ease: isDoorOpen ? "power2.out" : "power2.inOut",
+          overwrite: true,
+        });
+      });
 
       if (isDoorOpen) {
         gsap.to(doorGroup.rotation, {
@@ -205,9 +279,14 @@ export default function Fridge() {
       }
     }
 
-    mount.addEventListener("click", handleClick);
+    function handleClick() {
+      toggleDoor();
+    }
 
-    // ── INGREDIENT SPHERES ─────────────────────────────────
+    mount.addEventListener("click", handleClick);
+    openDoorRef.current = openDoor;
+
+    // ── INGREDIENT ITEMS ───────────────────────────────────
     const categoryColors: Record<string, string> = {
       protein: "#ff6b6b",
       vegetable: "#6bcb77",
@@ -216,31 +295,110 @@ export default function Fridge() {
       grain: "#ffb347",
     };
 
-    const ingredientSpheres = new Map<string, THREE.Mesh>();
+    const ingredientItems = new Map<string, THREE.Group>();
+    const slotById = new Map<string, number>();
+    const shelfSlots: Array<[number, number, number]> = [
+      [-0.62, 0.45, 0.22],
+      [0, 0.45, 0.22],
+      [0.62, 0.45, 0.22],
+      [-0.62, -0.05, 0.2],
+      [0, -0.05, 0.2],
+      [0.62, -0.05, 0.2],
+      [-0.62, -0.58, 0.18],
+      [0, -0.58, 0.18],
+      [0.62, -0.58, 0.18],
+      [-0.35, -0.95, 0.16],
+      [0.35, -0.95, 0.16],
+      [0, -1.2, 0.14],
+    ];
+
+    const getStableIndex = (id: string) => {
+      let hash = 0;
+      for (let i = 0; i < id.length; i++) {
+        hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+      }
+      return hash % shelfSlots.length;
+    };
+
+    const pickSlotIndex = (id: string) => {
+      if (slotById.has(id)) {
+        return slotById.get(id)!;
+      }
+
+      const preferred = getStableIndex(id);
+      const used = new Set(slotById.values());
+
+      if (!used.has(preferred)) {
+        slotById.set(id, preferred);
+        return preferred;
+      }
+
+      for (let i = 0; i < shelfSlots.length; i++) {
+        if (!used.has(i)) {
+          slotById.set(id, i);
+          return i;
+        }
+      }
+
+      slotById.set(id, preferred);
+      return preferred;
+    };
+
+    function createEmojiSprite(emoji: string) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 128;
+      canvas.height = 128;
+
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font =
+          '84px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(emoji, canvas.width / 2, canvas.height / 2 + 2);
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthWrite: false,
+      });
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(0.34, 0.34, 0.34);
+      sprite.position.set(0, 0.2, 0.09);
+      return sprite;
+    }
 
     function addIngredientSphere(id: string, category: string) {
-      const sphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.15, 16, 16),
+      const item = new THREE.Group();
+      const body = new THREE.Mesh(
+        new RoundedBoxGeometry(0.28, 0.2, 0.2, 3, 0.05),
         new THREE.MeshStandardMaterial({
           color: categoryColors[category] || "#ffffff",
           emissive: categoryColors[category] || "#ffffff",
-          emissiveIntensity: 0.2,
-          roughness: 0.4,
+          emissiveIntensity: 0.12,
+          roughness: 0.55,
           metalness: 0.0,
         }),
       );
 
-      sphere.position.set(
-        (Math.random() - 0.5) * 1.4,
-        (Math.random() - 0.5) * 2.2,
-        (Math.random() - 0.5) * 0.8,
-      );
+      const ingredient = getIngredientById(id);
+      const emojiSprite = createEmojiSprite(ingredient?.emoji ?? "🍽️");
+      item.add(body);
+      item.add(emojiSprite);
 
-      scene.add(sphere);
-      ingredientSpheres.set(id, sphere);
+      const slotIndex = pickSlotIndex(id);
+      const [x, y, z] = shelfSlots[slotIndex];
+      item.position.set(x, y, z);
+      item.userData.baseZ = z;
 
-      sphere.scale.set(0, 0, 0);
-      gsap.to(sphere.scale, {
+      scene.add(item);
+      ingredientItems.set(id, item);
+
+      item.scale.set(0, 0, 0);
+      gsap.to(item.scale, {
         x: 1,
         y: 1,
         z: 1,
@@ -248,9 +406,9 @@ export default function Fridge() {
         ease: "back.out(1.7)",
       });
 
-      gsap.to(sphere.position, {
-        y: sphere.position.y + 0.12,
-        duration: 1.5 + Math.random(),
+      gsap.to(item.position, {
+        y: item.position.y + 0.06,
+        duration: 1.2 + Math.random() * 0.6,
         repeat: -1,
         yoyo: true,
         ease: "sine.inOut",
@@ -258,25 +416,40 @@ export default function Fridge() {
     }
 
     function removeIngredientSphere(id: string) {
-      const sphere = ingredientSpheres.get(id);
-      if (!sphere) return;
+      const item = ingredientItems.get(id);
+      if (!item) return;
 
-      gsap.to(sphere.scale, {
+      gsap.to(item.scale, {
         x: 0,
         y: 0,
         z: 0,
         duration: 0.3,
         ease: "back.in(1.7)",
         onComplete: () => {
-          scene.remove(sphere);
-          sphere.geometry.dispose();
-          if (sphere.material instanceof THREE.Material) {
-            sphere.material.dispose();
-          }
-          ingredientSpheres.delete(id);
+          scene.remove(item);
+          item.traverse((obj) => {
+            if (obj instanceof THREE.Mesh) {
+              obj.geometry.dispose();
+              if (Array.isArray(obj.material)) {
+                obj.material.forEach((mat) => mat.dispose());
+              } else {
+                obj.material.dispose();
+              }
+            }
+
+            if (obj instanceof THREE.Sprite) {
+              obj.material.map?.dispose();
+              obj.material.dispose();
+            }
+          });
+          ingredientItems.delete(id);
+          slotById.delete(id);
         },
       });
     }
+
+    addSphereRef.current = addIngredientSphere;
+    removeSphereRef.current = removeIngredientSphere;
 
     // ── RESIZE ─────────────────────────────────────────────
     function handleResize() {
@@ -303,6 +476,10 @@ export default function Fridge() {
 
     // ── CLEANUP ────────────────────────────────────────────
     return () => {
+      addSphereRef.current = null;
+      removeSphereRef.current = null;
+      openDoorRef.current = null;
+      selectedPrevRef.current = [];
       window.removeEventListener("resize", handleResize);
       mount.removeEventListener("click", handleClick);
       cancelAnimationFrame(animationId);
@@ -314,10 +491,73 @@ export default function Fridge() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!addSphereRef.current || !removeSphereRef.current) return;
+
+    const prevSet = new Set(selectedPrevRef.current);
+    const nextSet = new Set(selectedIds);
+
+    // Items that were just selected (newly added to selectedIds)
+    const newlySelected = selectedIds.filter((id) => !prevSet.has(id));
+
+    // Items that were just deselected (removed from selectedIds)
+    const newlyDeselected = selectedPrevRef.current.filter(
+      (id) => !nextSet.has(id),
+    );
+
+    // Remove newly selected items from fridge
+    for (const id of newlySelected) {
+      removeSphereRef.current(id);
+    }
+
+    // Add back newly deselected items to fridge
+    for (const id of newlyDeselected) {
+      const ingredient = getIngredientById(id);
+      if (ingredient) {
+        addSphereRef.current(id, ingredient.category);
+      }
+    }
+
+    // If any items were newly selected, open the door
+    if (newlySelected.length > 0 && openDoorRef.current) {
+      openDoorRef.current();
+    }
+
+    selectedPrevRef.current = [...selectedIds];
+  }, [selectedIds]);
+
+  // Initialize fridge with all ingredients on mount
+  useEffect(() => {
+    if (!addSphereRef.current) return;
+
+    // Wait one frame to ensure mounted
+    const timer = setTimeout(() => {
+      for (const ingredient of INGREDIENTS) {
+        addSphereRef.current?.(ingredient.id, ingredient.category);
+      }
+      selectedPrevRef.current = [];
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div
-      ref={mountRef}
-      className="w-[min(92vw,560px)] h-[min(75vh,700px)] min-h-[500px]"
-    />
+    <div className="relative w-full h-[440px] md:h-[520px]">
+      {showHint && (
+        <div className="top-3 left-3 z-10 absolute bg-surface/95 px-3 py-2 border border-border rounded-lg pointer-events-none">
+          <p className="font-medium text-text-secondary text-xs">
+            Tip: click the fridge to open the door
+          </p>
+        </div>
+      )}
+      <div
+        ref={mountRef}
+        className="rounded-lg w-full h-full overflow-hidden"
+      />
+    </div>
   );
-}
+});
+
+Fridge.displayName = "Fridge";
+
+export default Fridge;

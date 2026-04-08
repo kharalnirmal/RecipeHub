@@ -24,6 +24,8 @@ const RecipeDetailPage = async ({ params }: PageProps) => {
         <Image
           src={recipe.image}
           alt={recipe.name}
+          width={1000}
+          height={1000}
           className="w-full h-full object-cover"
         />
         {/* Dark gradient over image so text is readable */}
@@ -39,7 +41,7 @@ const RecipeDetailPage = async ({ params }: PageProps) => {
         <div className="bottom-0 left-0 absolute p-8">
           <Link
             href="/recipes"
-            className="inline-block mb-4 text-sm no-underline"
+            className="inline-block bg-coral-light mb-4 px-5 py-3 rounded-xl text-sm no-underline"
             style={{ color: "rgba(255,255,255,0.7)" }}
           >
             ← Back to recipes

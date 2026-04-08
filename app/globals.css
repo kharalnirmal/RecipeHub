@@ -206,14 +206,14 @@
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.08);
   transition:
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-warm:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.12);
   transform: translateY(-2px);
 }
 
@@ -242,4 +242,73 @@
   text-decoration-style: wavy;
   text-decoration-color: var(--color-coral);
   text-underline-offset: 4px;
+}
+
+/* ── SMOOTH ANIMATIONS ────────────────────────────────────────
+   Modern, polished transitions and reveals
+──────────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes backdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes panelSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes subtle-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+.animate-backdrop-in {
+  animation: backdropIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-panel-slide-up {
+  animation: panelSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
