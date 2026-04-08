@@ -1,6 +1,15 @@
 import { searchByIngredients } from "@/lib/mealdb";
 import RecipeCard from "@/components/RecipeCard";
 import Link from "next/link";
+import { Metadata } from "next";
+
+// ── Page-specific metadata ─────────────────────────────────
+// In app/recipes/page.tsx:
+export const metadata: Metadata = {
+  title: "Recipe Results",
+  // Renders as: "Recipe Results | FridgeAI" (from template)
+  description: "Recipes found based on your ingredients.",
+};
 
 interface RecipesPageProps {
   searchParams: Promise<{ ingredients?: string }>;

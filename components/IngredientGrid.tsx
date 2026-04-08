@@ -33,8 +33,9 @@ export default function IngredientGrid({
 
   const handleFindRecipes = () => {
     if (selected.length === 0) return;
-    const query = selected.join(",");
-    router.push(`/recipes?ingredients=${query}`);
+    const params = new URLSearchParams();
+    params.set("ingredients", selected.join(","));
+    router.push("/recipes?" + params.toString());
   };
 
   return (

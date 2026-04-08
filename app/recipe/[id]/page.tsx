@@ -1,5 +1,6 @@
 import { getRecipeById } from "@/lib/mealdb";
-import { Link } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 interface PageProps {
@@ -20,7 +21,7 @@ const RecipeDetailPage = async ({ params }: PageProps) => {
     <main className="bg-background min-h-screen">
       {/* Hero image — full width at top */}
       <div className="relative w-full" style={{ height: "40vh" }}>
-        <img
+        <Image
           src={recipe.image}
           alt={recipe.name}
           className="w-full h-full object-cover"

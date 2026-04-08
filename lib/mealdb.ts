@@ -3,7 +3,7 @@ interface RawMeal {
   strMeal: string;
   strCategory?: string;
   strArea?: string;
-  strInstruction?: string;
+  strInstructions?: string;
   strMealThumb: string;
   strYoutube?: string;
   [key: string]: string | undefined;
@@ -18,7 +18,7 @@ interface RawSearchResponse {
 //oneplace for the base url
 //if it ever changes - updates here only
 
-const BASE = "www.themealdb.com/api/json/v1/1";
+const BASE = "https://www.themealdb.com/api/json/v1/1";
 
 //--- TransForm Function-----------------
 // converts raw  theMealDB meal => our recipe type
@@ -35,7 +35,7 @@ function transformMeal(raw: RawMeal): Recipe {
   const measures: string[] = [];
 
   for (let i = 1; i <= 20; i++) {
-    const ingredient = raw[`strIngredients${i}`];
+    const ingredient = raw[`strIngredient${i}`];
     const measure = raw[`strMeasure${i}`];
 
     if (ingredient && ingredient.trim() !== "") {
